@@ -1,0 +1,197 @@
+<html>
+<head><title>Project  1</title></head>
+<!---<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">--->
+<meta http-equiv=Content-Type content="text/html; charset=big5">
+<body>
+<script type="text/javascript"> 
+  function blink() {
+    var blinks = document.getElementsByTagName('blink');
+    for (var i = blinks.length - 1; i >= 0; i--) {
+      var s = blinks[i];
+      s.style.visibility = (s.style.visibility === 'visible') ? 'hidden' : 'visible';
+    }
+    window.setTimeout(blink, 1000);
+  }
+  if (document.addEventListener) document.addEventListener("DOMContentLoaded", blink, false);
+  else if (window.addEventListener) window.addEventListener("load", blink, false);
+  else if (window.attachEvent) window.attachEvent("onload", blink);
+  else window.onload = blink;
+</script>
+
+<center><H1>Project 1</h1> </center><br>
+<ul>
+   <li> <b>Description:</b> <br>
+    <ul>
+      <li>
+        <ul>
+          <li>Question 
+            <ol>
+             <li>Requirement:
+                <ul>
+                  <li>In this project, you need to write a new system call 
+                      <font color="blue"><code>void * my_get_physical_addresses(void *)</code></font> 
+                      so that a process can use it to get the physical address of a virtual address of a process. 
+                  <li>The return value of this system call is either 0 or an address value. 
+                      0 means that there is no physical address assigned to the logical address currently. A non-zero value means 
+                      the physical address of the logical address
+                      submitted to the system call as its parameter (in fact, this address is only the offset of a logical address).
+
+                </ul>
+             <li>
+              <pre><code><font color="blue">
+                 //prototype of the new system call is as follows:     
+
+                 void * my_get_physical_addresses(void *)
+               
+              </code></pre></font>
+
+             <li><b>Question 1</b> (<font color="red"><b>50</b></font> points) <BR>
+
+                 What follows is an example code which you can use to see the effect of copy-on-write. 
+
+                 <pre><code><font color="blue">
+
+                 #include &lt;stdio.h&gt;
+                
+
+                 //void * my_get_physical_addresses(void *);
+
+
+
+                 int global_a=123;  //global variable
+
+                 void hello(void)
+                 {                    
+                    printf("======================================================================================================\n");
+                 }  
+
+
+                 int main()
+                 { 
+                   int      loc_a;
+                   void     *parent_use, *child_use;  
+
+                   printf("===========================Before Fork==================================\n");             
+                   parent_use=my_get_physical_addresses(&global_a);
+                   printf("pid=%d: global variable global_a:\n", getpid());  
+                   prinft("Offest of logical address:[%p]   Physical address:[%p]\n", &global_a,parent_use);              
+                   printf("========================================================================\n");  
+
+                   
+                   if(fork())
+                   { /*parent code*/
+                     printf("vvvvvvvvvvvvvvvvvvvvvvvvvv  After Fork by parent  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n"); 
+                     parent_use=my_get_physical_addresses(&global_a);
+                     printf("pid=%d: global variable global_a:\n", getpid()); 
+                     prinft("******* Offset of logical address:[%p]   Physical address:[%p]\n", &global_a,parent_use); 
+                     printf("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");                      
+                     wait();                    
+                   }
+                   else
+                   { /*child code*/
+
+                     printf("llllllllllllllllllllllllll  After Fork by child  llllllllllllllllllllllllllllllll\n"); 
+                     child_use=my_get_physical_addresses(&global_a);
+                     printf("******* pid=%d: global variable global_a:\n", getpid());  
+                     prinft("******* Offset of logical address:[%p]   Physical address:[%p]\n", &global_a, child_use); 
+                     printf("llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll\n");  
+                     printf("____________________________________________________________________________\n");  
+
+                     /*----------------------- trigger CoW (Copy on Write) -----------------------------------*/    
+                     global_a=789;
+
+                     printf("iiiiiiiiiiiiiiiiiiiiiiiiii  Test copy on write in child  iiiiiiiiiiiiiiiiiiiiiiii\n"); 
+                     child_use=my_get_physical_addresses(&global_a);
+                     printf("******* pid=%d: global variable global_a:\n", getpid());  
+                     prinft("******* Offset of logical address:[%p]   Physical address:[%p]\n", &global_a, child_use); 
+                     printf("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\n");  
+                     printf("____________________________________________________________________________\n");                  
+                     sleep(1000);
+                   }
+                 }
+
+                </code></pre></font>
+
+             <li><b>Question 2</b> (<font color="red"><b>50</b></font> points) <BR>
+
+                 What follows is an example code which you can use to check whether a loader loads all data of a process before
+                 executing it. 
+
+                 <pre><code><font color="blue">
+
+                 #include &lt;stdio.h&gt;
+                
+
+                 //void * my_get_physical_addresses(void *);
+
+
+
+                 int a[2000000]; 
+                 
+
+
+                 int main()
+                 { 
+                   int      loc_a;
+                   void     *phy_add;  
+
+                          
+                   phy_add=my_get_physical_addresses(&a[0]);
+                   printf("global element a[0]:\n", );  
+                   prinft("Offest of logical address:[%p]   Physical address:[%p]\n", &a[0], phy_add);              
+                   printf("========================================================================\n"); 
+                   phy_add=my_get_physical_addresses(&a[1999999]);
+                   printf("global element a[1999999]:\n", );  
+                   prinft("Offest of logical address:[%p]   Physical address:[%p]\n", &a[1999999], phy_add);              
+                   printf("========================================================================\n"); 
+     
+
+                 }
+
+                </code></pre></font>
+ 
+             <li>Hint:
+               <ul>
+                <li>Two threads show a physical memory cell (one byte) if both of them have a virtual address that is translated into the physical address of the memory cell.
+                <li>The kernel usually does not allocate physical memories to store all code and data of a process when the process starts execution.
+                <li>Inside the Linux kernel, you need to use function
+                      <a href="https://elixir.free-electrons.com/linux/v3.9/source/arch/x86/include/asm/uaccess_32.h#L202">
+                      <font color="green"><code>copy_from_user()</code></font></a> and function
+                      <a href="https://elixir.free-electrons.com/linux/v3.9/source/arch/x86/lib/usercopy_32.c#L658">
+                      <font color="green"><code>copy_to_user()</code></font></a> to copy data from/to a user address buffer.
+                <li>Check the "Referenced Material" part of the Course web site to see
+                     how to add a new system call in Linux.                   
+               </ul>
+             </ol>
+        </ul>
+    </ul>
+   <li> <b>Project Submission: </b>
+      <ul>
+        <li>Due time: <font color="red"><b>23:55 10th Nov.</b></font> 
+        <li>The demo will be held from <font color="red"><b>11th Nov.</b></font> 
+            to <font color="red"><b>12 Nov.</b></font> 
+        <li>Please fill out this
+            <a href="https://docs.google.com/spreadsheets/d/1WKJkC0sjSVLbHsdyI69zoKQZTe9ZDI7EsGTQ1cM1aTI/edit?gid=1339148355#gid=1339148355">form</a> 
+            to choose your demo time
+            before <font color="red"><b>10th Nov.</b></font> 
+        <li>On site demo of this project is required. 
+        <li>During on site demo, the TAs will execute several programs written by them to check the correctness of your system calls.
+        <li>When demonstrating your projects, the TAs will ask you some questions regarding to your projects.
+            Part of
+            your project grade is determined by your answers to the questions.
+	<li><img src="http://www.csie.ncu.edu.tw/~hsufh/newfloat.gif">Report Content:
+          <ul>
+            <li> Do not forget writing the names and student IDs of all members in your team.
+            <li> Your report should be in <font color="red"><b>hackmd</b></font> document form and contain:
+              <ul>
+                <li>Your source code
+                <li>the execution results
+              </ul>
+            <li>Submit the URL of your <font color="red"><b>hackmd</b></font> document to the new-eeclass.
+          </ul> 	
+	<li>Late submission will <b>NOT</b> be accepted.    
+      </ul>
+  
+  </ul>
+</body>
+</html>
