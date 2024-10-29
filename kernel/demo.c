@@ -4,7 +4,8 @@
 
 SYSCALL_DEFINE1(demo, void *, ptr_addr)
 {
-    unsigned long v_addr = (unsigned long)ptr_addr pgd_t * pgd;
+    unsigned long v_addr = (unsigned long)ptr_addr;
+    pgd_t *pgd;
     // 使用 `arch` 來查看目前電腦的架構是那一種，以實驗機為例是使用 x86_64 架構，asm insturction set 架構
     // current 為目前的 process pointer https://elixir.bootlin.com/linux/v6.11.5/source/arch/x86/include/asm/current.h#L52
     // current 型態是 https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/sched.h#L758
@@ -18,9 +19,9 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     pgd = pgd_offset(current->mm, v_addr);
 
 #ifdef DEBUG
-    printk("pgd_val = 0x%lu\n", *pgd);
+    printk("pgd_val = 0x%lu\n", pgd->pgd);
     // pgd_index，找出當前 page gloab table index entry. https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L90
     printk("pgd_index = %lu\n", pgd_index(v_addr));
 #endif
-    return 0;
+    return pgd->pgd;
 }
