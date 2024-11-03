@@ -49,31 +49,37 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
         在 64bits processors 情況下，一個 word 是 8bytes 共用，能夠存 2^9 個
     */
 
-    //     pud_t *pud;
-    //     pud = pud_offset(pgd, v_addr);
-    // #ifdef DEBUG
-    // 	printk("pud_val = 0x%lx\n", pud->pud); // pgd_offset 的內容
-    //     printk("pud_val = 0x%lx\n", pud); // pgd_offset 的位置
+    // x86, asm 的特殊架構，用意是 to find an entry in a page-table-directory.
+    p4d_t *p4d;
+    p4d = p4d_offset(pgd, v_addr);
 
-    //     // pgd_index，找出當前 page gloab table index entry. https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L90
-    //     // 關於 pgd_index 的解釋 https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L56
-    // 	// printk("pgd_index = %lx\n", pgd_index(v_addr));
-    //     printk("pud_index = %lx\n", pud_index(v_addr));
-    // #endif
+    pud_t *pud;
+    pud = pud_offset(p4d, v_addr);
+#ifdef DEBUG
+    printk("pud_val = 0x%lx\n", pud->pud);
+    printk("pud_val = 0x%lx\n", *pud);
+    printk("pud_index = %lx\n", pud_index(v_addr));
+#endif
 
-    //     pmd_t *pmd;
-    //     pmd = pmd_offset(pud, v_addr);
-    // #ifdef DEBUG
-    // 	printk("pmd_val = 0x%lx\n", pmd->pmd); // pgd_offset 的內容
-    //     printk("pmd_val = 0x%lx\n", pmd); // pgd_offset 的位置
+    pmd_t *pmd;
+    pmd = pmd_offset(pud, v_addr);
+#ifdef DEBUG
+    printk("pmd_val = 0x%lx\n", pmd->pmd);
+    printk("pmd_val = 0x%lx\n", *pmd);
+    // 在 kernel v6.11.5 中有提供 pmd_off， 可直接用 current->mm call 到 pmd_off.
+    printk("pmd_val with pmd_off_k method = 0x%lx\n", pmd_off(current->mm, v_addr));
+    printk("pmd_index = %lx\n", pmd_index(v_addr));
+#endif
 
-    //     // pgd_index，找出當前 page gloab table index entry. https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L90
-    //     // 關於 pgd_index 的解釋 https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L56
-    // 	// printk("pgd_index = %lx\n", pgd_index(v_addr));
-    //     printk("pmd_index = %lx\n", pmd_index(v_addr));
-    // #endif
+    pte_t *pte;
+    pte = pte_offset_kernel(pmd, v_addr);
+#ifdef DEBUG
+    printk("pte_val = 0x%lx\n", pte->pte);
+    printk("pte_val = 0x%lx\n", *pte);
+    printk("pte_index = %lx\n", pte_index(v_addr));
+#endif
 
-    //     pte_t *pte;
-
-    return pgd->pgd;
+    unsigned long offset = v_addr & (4096 - 1);
+    unsigned long p_addr = pte->pte + (offset << 3);
+    return p_addr;
 }
