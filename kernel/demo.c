@@ -71,10 +71,10 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     pmd_t *pmd;
     pmd = pmd_off(current->mm, v_addr);
 #endif
-    if (pmd_none(pmd))
+    if (pmd_none(*pmd))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return 0;
+        return (unsigned long)0; // TODO: 用 return NULL 看看回傳的結果會不會是 0x0
     }
 
 #ifdef DEBUG
@@ -86,8 +86,9 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     // 在 kernel v6.11.5 中有提供 pmd_off， 可直接用 current->mm call 到 pmd_off.
     printk("pmd_address with pmd_off_k method = 0x%lx\n", pmd_off(current->mm, v_addr)); // pmd 位置
     printk("pmd_index = %lx\n", pmd_index(v_addr));
-
+#ifndef QUICK_SEARCH
     printk("pmd_base 0x%lx\n", pud_pgtable(*pud));
+#endif
 #endif
 
     pte_t *pte;
