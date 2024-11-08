@@ -9,8 +9,9 @@
 __SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L242
 SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L226
 */
-SYSCALL_DEFINE1(demo, void *, ptr_addr)
+SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 {
+    // TODO: copy_from_user
     unsigned long v_addr = (unsigned long)ptr_addr;
     pgd_t *pgd;
     // 使用 `arch` 來查看目前電腦的架構是那一種，以實驗機為例是使用 x86_64 架構，asm insturction set 架構
@@ -74,7 +75,7 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     if (pmd_none(*pmd))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return (unsigned long)0; // TODO: 用 return NULL 看看回傳的結果會不會是 0x0
+        return (void *)pmd->pmd; // TODO: 用 return NULL 看看回傳的結果會不會是 0x0
     }
 
 #ifdef DEBUG
@@ -118,5 +119,9 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     printk("(pte->pte & PAGE_MASK) = %p\n", (pte->pte & PAGE_MASK));
     printk("p_addr = 0x%lx\n", p_addr);
 #endif
+
+    // cp_addr = copy_to_user(p_addr)
+    // TODO: copy_to_user
+
     return p_addr;
 }
