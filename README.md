@@ -101,6 +101,44 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 }
 ```
 
+### 上面 code 的一些補充理論，可略過
+* marco 定義
+```c
+// 使用 marco 的方式並透過 (<type>, <name>) 進行 map 來完成多個參數應用。 https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L117
+// backtrace:
+/*
+__SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L242
+SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L226
+*/
+```
+* page directory 
+```c
+// 使用 `arch` 來查看目前電腦的架構是那一種，以實驗機為例是使用 x86_64 架構，asm insturction set 架構
+// current 為目前的 process pointer https://elixir.bootlin.com/linux/v6.11.5/source/arch/x86/include/asm/current.h#L52
+// current 型態是 https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/sched.h#L758
+// current->mm 表達 the process address space，src https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/sched.h#L758
+// mm struct https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/mm_types.h#L779
+// mm->pgd_t 表達 global page table，https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/mm_types.h#L806
+// pgd_t 的結構 https://elixir.bootlin.com/linux/v6.11.5/source/arch/x86/include/asm/pgtable_types.h#L295
+// pgd_t->pgdval_t 的型態 https://elixir.bootlin.com/linux/v6.11.5/source/arch/x86/include/asm/pgtable_64_types.h#L18
+// pgd_offset，可直接從 mm 去 get pgd_t https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L147.
+// pgd_index，找出當前 page gloab table index entry. https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L90
+// 關於 pgd_index 的解釋 https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/pgtable.h#L56
+// #define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
+// pgd_index 的原理是將右邊的 39bit 右移掉，在與 255 做 &，保證數字必定在 255 以內符合 page table 2^9 架構
+```
+* 有相關聯的的計算機組織
+```c
+/*  在 x86-64 processors 使用 long mode 模式，採用 PAE 模式。
+        它使用 page 12 bit offset, 4 層 9bit 的 page directory，共用到 48bits.
+        共用到 48bits，高位元則等待被設計、擴展。
+        9bit 的原因是因為，一個 page 4kb 共 2^12 byte.
+        在 32bits processors 情況下，一個 word 是 4bytes 共用，能夠存 2^10 個
+        在 64bits processors 情況下，一個 word 是 8bytes 共用，能夠存 2^9 個
+    */
+    // x86, asm 的特殊架構，用意是 to find an entry in a page-table-directory.
+```
+
 ## 實驗結果
 ### 實驗設定
 * `x86` 架構
