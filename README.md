@@ -137,6 +137,15 @@ SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/sy
         在 64bits processors 情況下，一個 word 是 8bytes 共用，能夠存 2^9 個
     */
     // x86, asm 的特殊架構，用意是 to find an entry in a page-table-directory.
+
+    /*
+    page table 是使用 0~64bit 紀錄資料，12~64 bit 資料是 physical page address.
+    0~11 bit 則是用於記這個 page table 的其他供用，例如 read/write, dirty, cache disable 之類的
+    page table 圖表網址連結：https://stackoverflow.com/questions/68025493/the-size-of-a-page-table-entry
+    */
+
+    // PAGE_MASK 用於 ignore page table 0~11bit 的 page 資訊。
+    // 將 offset 與 memory physical address 合併就是完整的 physical address
 ```
 
 ## 實驗結果
