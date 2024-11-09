@@ -1,0 +1,6 @@
+global element a[0]:
+Offest of logical address:[0x646211116040]   Physical address:[0x63600040]
+========================================================================
+global element a[1999999]:
+Offest of logical address:[0x6462118b723c]   Physical address:[(nil)]
+========================================================================

@@ -9,8 +9,9 @@
 __SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L242
 SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/syscalls.h#L226
 */
-SYSCALL_DEFINE1(demo, void *, ptr_addr)
+SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 {
+    // TODO: copy_from_user
     unsigned long v_addr = (unsigned long)ptr_addr;
     pgd_t *pgd;
     // 使用 `arch` 來查看目前電腦的架構是那一種，以實驗機為例是使用 x86_64 架構，asm insturction set 架構
@@ -74,7 +75,7 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     if (pmd_none(*pmd))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return (unsigned long)0; // TODO: 用 return NULL 看看回傳的結果會不會是 0x0
+        return (void *)pmd->pmd; // TODO: 用 return NULL 看看回傳的結果會不會是 0x0
     }
 
 #ifdef DEBUG
@@ -103,14 +104,7 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
 #endif
 
     unsigned long offset = v_addr & ((unsigned long)4096 - (unsigned long)1); // 用 2^12-1 來保留最後的 12bit
-    /*
-    page table 是使用 0~64bit 紀錄資料，12~64 bit 資料是 physical page address.
-    0~11 bit 則是用於記這個 page table 的其他供用，例如 read/write, dirty, cache disable 之類的
-    page table 圖表網址連結：https://stackoverflow.com/questions/68025493/the-size-of-a-page-table-entry
-    */
 
-    // PAGE_MASK 用於 ignore page table 0~11bit 的 page 資訊。
-    // 將 offset 與 memory physical address 合併就是完整的 physical address
     unsigned long p_addr = (pte->pte & PAGE_MASK) | offset;
 
 #ifdef DEBUG
@@ -118,5 +112,9 @@ SYSCALL_DEFINE1(demo, void *, ptr_addr)
     printk("(pte->pte & PAGE_MASK) = %p\n", (pte->pte & PAGE_MASK));
     printk("p_addr = 0x%lx\n", p_addr);
 #endif
+
+    // cp_addr = copy_to_user(p_addr)
+    // TODO: copy_to_user
+
     return p_addr;
 }
