@@ -47,7 +47,7 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     if (pmd_none(*pmd))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return pmd->pmd;
+        return -EFAULT;
     }
 #endif
 
@@ -65,7 +65,7 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     if (pte_none(*pte))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return pte->pte;
+        return EFAULT;
     }
 
     printk("pte_val using pointing to = 0x%lx\n", pte->pte);
@@ -91,5 +91,5 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     printk("p_addr = 0x%lx\n", p_addr);
 
     // copy_to_user(ptr_addr, &p_addr, sizeof(unsigned long));
-    return p_addr;
+    return (void *)p_addr;
 }
