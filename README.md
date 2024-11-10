@@ -152,6 +152,9 @@ SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/sy
 ### 實驗設定
 * `x86` 架構
 * `asm` 組合語言
+* 12 核心
+* 32 GB 
+
 ### Q1 
 * [題目提供的程式碼位置](./q1.c) 
 * 大綱：在 fork 以後，加上由於 copy-on-write 技術，global 變數會被共用，但當任一個 process 修改 gloabl variable 時，則 child process 會與 parent process 不再共用,當虛擬位置會相同。 
@@ -165,6 +168,9 @@ SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/sy
 * [更詳細的說明](https://www.quora.com/When-does-a-global-variable-get-memory-allocation-in-C-language)
 * [題目執行後結果](./q2.txt)
 
+### 記憶體驗證
+* 最後 3 位數必須相同，因為 offset 是 12bit，virtual address and physical address 12 bits 相同。 
+* 記憶體大小限制，以實驗機為例 32GB，是 `2^(30+5)` bytes 換算成 16 進制為 800000000 bytes，所以實體 memory 位置不可以大於 800000000. 
 
 ## 參考連結
 * [linux kernel 編譯 system call](https://hackmd.io/aist49C9R46-vaBIlP3LDA?view#%E6%B8%AC%E8%A9%A6-syscall) 
