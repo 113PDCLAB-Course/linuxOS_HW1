@@ -4,15 +4,11 @@
 
 SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 {
-    // printk("ptr_addr = 0x%lx\n", ptr_addr); // pgd_offset 的內容
-    // unsigned long v_addr = 0;
-    // copy_from_user(&v_addr, ptr_addr, sizeof(*ptr_addr));
     unsigned long v_addr = (unsigned long)ptr_addr;
-    // unsigned long v_addr = (unsigned long)vp_addr;
-
 #ifdef ORIGANAL_KERNEL
 
-    pgd_t *pgd;
+    pgd_t *
+        pgd;
     pgd = pgd_offset(current->mm, v_addr);
     printk("pgd_val using pointing to = 0x%lx\n",
            pgd->pgd); // pgd_offset 的內容
@@ -42,12 +38,14 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
             ->pmd; // TODO: 用 return NULL 看看回傳的結果會不會是 0x0
     }
 #else
-    pmd_t *pmd;
+    pmd_t *
+        pmd;
     pmd = pmd_off(current->mm, v_addr);
     if (pmd_none(*pmd))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return -EFAULT;
+        // return -EFAULT;
+        return 0x0;
     }
 #endif
 
@@ -65,7 +63,8 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     if (pte_none(*pte))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return EFAULT;
+        // return -EFAULT;
+        return 0x0;
     }
 
     printk("pte_val using pointing to = 0x%lx\n", pte->pte);
@@ -78,7 +77,7 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 
     printk("pte_val using pte_val = 0x%lx\n", pte_val(*pte));
     unsigned long pfn = pte_pfn(
-        *pte); // ignore 58~63bit and 0~12 bit, extract the page physical address
+        *pte); // ignore 60~63bit and 0~12 bit, extract the page physical address
     printk("pfn_val using function = 0x%lx\n", pfn);
 
     unsigned long offset =
@@ -90,6 +89,5 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     printk("v_addr = 0x%lx\n", v_addr);
     printk("p_addr = 0x%lx\n", p_addr);
 
-    // copy_to_user(ptr_addr, &p_addr, sizeof(unsigned long));
-    return (void *)p_addr;
+    return p_addr;
 }

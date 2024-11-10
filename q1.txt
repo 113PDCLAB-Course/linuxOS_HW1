@@ -1,22 +1,22 @@
 ===========================Before Fork==================================
-pid=1596: global variable global_a:
-Offest of logical address:[0x628a11af7010]   Physical address:[0x3dea5010]
+pid=1537: global variable global_a:
+Offest of logical address:[0x5f8dc7c28010]   Physical address:[0x735d9010]
 ========================================================================
 llllllllllllllllllllllllll  After Fork by child  llllllllllllllllllllllllllllllll
-******* pid=1597: global variable global_a:
-******* Offset of logical address:[0x628a11af7010]   Physical address:[0x3dea5010]
+******* pid=1538: global variable global_a:
+******* Offset of logical address:[0x5f8dc7c28010]   Physical address:[0x735d9010]
 llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 ____________________________________________________________________________
 iiiiiiiiiiiiiiiiiiiiiiiiii  Test copy on write in child  iiiiiiiiiiiiiiiiiiiiiiii
-******* pid=1597: global variable global_a:
-******* Offset of logical address:[0x628a11af7010]   Physical address:[0x45538010]
+******* pid=1538: global variable global_a:
+******* Offset of logical address:[0x5f8dc7c28010]   Physical address:[0x4e6f3010]
 iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
 ____________________________________________________________________________
 ===========================Before Fork==================================
-pid=1596: global variable global_a:
-Offest of logical address:[0x628a11af7010]   Physical address:[0x3dea5010]
+pid=1537: global variable global_a:
+Offest of logical address:[0x5f8dc7c28010]   Physical address:[0x735d9010]
 ========================================================================
 vvvvvvvvvvvvvvvvvvvvvvvvvv  After Fork by parent  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-pid=1596: global variable global_a:
-******* Offset of logical address:[0x628a11af7010]   Physical address:[0x3dea5010]
+pid=1537: global variable global_a:
+******* Offset of logical address:[0x5f8dc7c28010]   Physical address:[0x735d9010]
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
