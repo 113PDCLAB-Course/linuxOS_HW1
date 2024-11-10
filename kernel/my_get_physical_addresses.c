@@ -1,6 +1,6 @@
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
-#define ORIGANAL_KERNEL
+// #define ORIGANAL_KERNEL
 
 SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 {
@@ -30,7 +30,8 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
 
     pud_t *pud;
     pud = pud_offset(p4d, v_addr);
-    printk("pmd_addr = 0x%lx\n", pud_pgtable(*pud));
+    printk("pud_val = 0x%lx\n", pud->pud);
+    printk("pud_addr = 0x%lx\n", pud_pgtable(*pud));
 
     pmd_t *pmd;
     pmd = pmd_offset(pud, v_addr);
@@ -46,18 +47,17 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     if (pmd_none(*pmd))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return (void *)pmd->pmd;
+        return pmd->pmd;
     }
 #endif
 
     printk("pmd_val using pointing to = 0x%lx\n", pmd->pmd);
     printk("pmd_val using dereferencing = 0x%lx\n", *pmd);
     printk("pmd_val using function  = 0x%lx\n", pmd_val(*pmd));
-    printk("pmd_val with pmd_off_k method = 0x%lx\n",
+    printk("pmd_val with pmd_off method = 0x%lx\n",
            *pmd_off(current->mm, v_addr));
-    printk("pmd_address with pmd_off_k method = 0x%lx\n",
+    printk("pmd_address with pmd_off method = 0x%lx\n",
            pmd_off(current->mm, v_addr));
-    printk("pmd_base = 0x%lx\n", pmd_page_vaddr(*pmd));
     printk("pmd_index = %lx\n", pmd_index(v_addr));
 
     pte_t *pte;
@@ -65,25 +65,31 @@ SYSCALL_DEFINE1(my_get_physical_addresses, void *, ptr_addr)
     if (pte_none(*pte))
     {
         printk("doesn't have memory space for this virtual address\n");
-        return (void *)pte->pte;
+        return pte->pte;
     }
 
-    printk("pte_val = 0x%lx\n", pte->pte);
-    printk("pte_val = 0x%lx\n", *pte);
-    printk("pte_val = 0x%lx\n", pte_val(*pte));
+    printk("pte_val using pointing to = 0x%lx\n", pte->pte);
+    printk("pte_val using dereferencing = 0x%lx\n", *pte);
+    printk("pte_val using pte_val = 0x%lx\n", pte_val(*pte));
+    printk("pte_addr with pte_offset_kernel method = 0x%lx\n",
+           pte_offset_kernel(pmd, v_addr));
     printk("pte_index = %lx\n", pte_index(v_addr));
+    printk("pte_base = 0x%lx\n", pmd_page_vaddr(*pmd));
+
+    printk("pte_val using pte_val = 0x%lx\n", pte_val(*pte));
+    unsigned long pfn = pte_pfn(
+        *pte); // ignore 58~63bit and 0~12 bit, extract the page physical address
+    printk("pfn_val using function = 0x%lx\n", pfn);
 
     unsigned long offset =
-        (unsigned long)v_addr &
+        v_addr &
         ((unsigned long)4096 -
-         (unsigned long)1); // 用 2^12-1 來保留最後的 12bit
-    unsigned long p_addr = (pte->pte & PAGE_MASK) |
-                           offset; // PAGE_MASK 移除 page_table 的資訊
+         (unsigned long)1); // using 2^12-1 to retain bits from 0 to 11.
+    unsigned long p_addr = (pfn << PAGE_SHIFT) | offset;
 
-    printk("(pte->pte & PAGE_MASK) = 0x%lx\n", (pte->pte & PAGE_MASK));
-    printk("(pte->pte & PAGE_MASK) = 0x%lx\n", (pte->pte & PAGE_MASK));
+    printk("v_addr = 0x%lx\n", v_addr);
     printk("p_addr = 0x%lx\n", p_addr);
 
-    copy_to_user(ptr_addr, &p_addr, sizeof(unsigned long));
-    return ptr_addr;
+    // copy_to_user(ptr_addr, &p_addr, sizeof(unsigned long));
+    return p_addr;
 }
