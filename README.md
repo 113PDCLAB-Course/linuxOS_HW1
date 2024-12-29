@@ -172,6 +172,26 @@ SYSCALL_DEFINEx https://elixir.bootlin.com/linux/v6.1.51/source/include/linux/sy
 * 最後 3 位數必須相同，因為 offset 是 12bit，virtual address and physical address 12 bits 相同。 
 * 記憶體大小限制，以實驗機為例 32GB，是 `2^(30+5)` bytes 換算成 16 進制為 800000000 bytes，所以實體 memory 位置不可以大於 800000000. 
 
+## 助教題目回答
+1. 甚麼時候會用到system call
+需要使用到 system call 去使用 kernel space 的程式時
+2. fork 的marco是甚麼
+macro 本質上是文字替換，它會在 complier 時進行替換，將一個命令換成一系列指令
+3. copy from user/copy to user 是在做什麼
+將 user space variable 安全的 copy to kernel space, vice versa 
+4. make 那三條指令是什麼意思
+    * `make -j12` complier kernel with 12 core.
+    * `make modules_install -j12` install kernel module 
+    * `make install -j12` install kernel. 
+5. bss segment /data segment 是指甚麼 
+    * bss segment 用於儲存尚未初始化的 global variable 
+    * data segment 用於儲存已經初始化的 global variable 
+6. mm_struct本身是什麼struct -> task struct
+用於管理 memory 的 struct，在 task struct 下的一個參數，task strcut 用於表達當前執行的 process 
+7. page fault 甚麼時候會發生
+當 virtual memory can't map to physical memory. 
+8. 我給忘了
+
 ## 參考連結
 * [linux kernel 編譯 system call](https://hackmd.io/aist49C9R46-vaBIlP3LDA?view#%E6%B8%AC%E8%A9%A6-syscall) 
 * [實作一個回傳物理位址的系統呼叫](https://hackmd.io/@Mes/make_phy_addr_syscall)
